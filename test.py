@@ -1,5 +1,6 @@
 import Tkinter as tk
 import requests
+from PIL import Image, ImageTk
 
 class Login:
     def __init__(self, master):
@@ -58,26 +59,35 @@ class Home:
                        "listing_type": "buy", "place_name": self.searchQuery.get()}
 
         response = requests.request("GET", url, params=querystring)
-        print response.json()
+        # print response.json()
         result = response.json()
-        print "PRETTY RESULT: "
         print result["response"]["listings"][0]["title"]
-        self.searchToResults()
+        self.searchToResults(result)
 
-    def searchToResults(self):
+    def searchToResults(self, result):
         self.newWindow = tk.Toplevel(self.master)
-        self.app = SearchResults(self.newWindow)
+        self.app = SearchResults(self.newWindow, result)
 
     def close_windows(self):
         self.master.destroy()
 
 
 class SearchResults:
-    def __init__(self, master):
+    def __init__(self, master, result):
         self.master = master
         self.frame = tk.Frame(self.master)
-        self.title = tk.Label(self.frame, text="Hello", width=50)
+        self.title = tk.Label(self.frame, text= "Property Result" , width=50)
         self.title.pack()
+
+        self.listingTitle = tk.Label(self.frame, text= result["response"]["listings"][0]["title"], width=50)
+        self.listingTitle.pack()
+        self.keywords = tk.Label(self.frame, text= result["response"]["listings"][0]["keywords"], width=50)
+        self.keywords.pack()
+        self.price = tk.Label(self.frame, text= result["response"]["listings"][0]["price_formatted"], width=50)
+        self.price.pack()
+        
+        self.frame.pack()
+
 
     def close_windows(self):
         self.master.destroy()
