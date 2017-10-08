@@ -1,6 +1,8 @@
 import Tkinter as tk
 import requests
+import Tkconstants as tkc
 from PIL import Image, ImageTk
+import urllib, cStringIO
 
 class Login:
     def __init__(self, master):
@@ -34,6 +36,7 @@ class Login:
 
     def close_windows(self):
         self.master.destroy()
+
 
 class Home:
     def __init__(self, master):
@@ -73,21 +76,41 @@ class Home:
 
 
 class SearchResults:
+
+    # def on_configure(canvas):
+    #     canvas.configure(scrollregion=canvas.bbox('all'))
+
     def __init__(self, master, result):
+        # canvas = tk.Canvas(self)
+        # canvas.pack(side=tkc.LEFT)
+        # bar = tk.Scrollbar(self.frame, command=canvas.yview)
+        # bar.pack(side=tkc.RIGHT, fill=tkc.Y)
+        # canvas.configure(yscrollcommand=bar.set)
+        # canvas.bind('<Configure>', self.on_configure)
+        # frame = tk.Frame(canvas)
+        # canvas.create_window((0, 0), window=frame, anchor='nw')
         self.master = master
         self.frame = tk.Frame(self.master)
-        self.title = tk.Label(self.frame, text= "Property Result" , width=50)
+        self.title = tk.Label(self.frame, text="Property Results", width=50)
         self.title.pack()
 
-        self.listingTitle = tk.Label(self.frame, text= result["response"]["listings"][0]["title"], width=50)
-        self.listingTitle.pack()
-        self.keywords = tk.Label(self.frame, text= result["response"]["listings"][0]["keywords"], width=50)
-        self.keywords.pack()
-        self.price = tk.Label(self.frame, text= result["response"]["listings"][0]["price_formatted"], width=50)
-        self.price.pack()
-        
+        for set1 in result["response"]["listings"]:
+            #print(set1["title"])
+            #Image
+            url = set1["img_url"]
+            fileurl = cStringIO.StringIO(urllib.urlopen(url).read())
+            image = Image.open(fileurl)
+            photo1 = ImageTk.PhotoImage(image)
+            imgLabel = tk.Label(self.frame, image=photo1)
+            imgLabel.img = photo1
+            imgLabel.pack()
+            self.listingTitle = tk.Label(self.frame, text=set1["title"], width=50)
+            self.listingTitle.pack()
+            self.keywords = tk.Label(self.frame, text=set1["keywords"], width=50)
+            self.keywords.pack()
+            self.price = tk.Label(self.frame, text=set1["price_formatted"], width=50)
+            self.price.pack()
         self.frame.pack()
-
 
     def close_windows(self):
         self.master.destroy()
