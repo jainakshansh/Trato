@@ -32,6 +32,7 @@ class Login:
 
     def loginToSearch(self):
         self.newWindow = tk.Toplevel(self.master)
+        # frame.raise()
         self.app = Home(self.newWindow)
 
     def close_windows(self):
@@ -130,7 +131,6 @@ def main():
     root = tk.Tk()
     app = Login(root)
     root.mainloop()
-
 
 if __name__ == '__main__':
     main()
