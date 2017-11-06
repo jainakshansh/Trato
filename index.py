@@ -1,32 +1,31 @@
-from Tkinter import *
+import Tkinter as tk
 
-def data():
-    for i in range(50):
-       Label(frame,text=i).grid(row=i,column=0)
-       Label(frame,text="my text"+str(i)).grid(row=i,column=1)
-       Label(frame,text="..........").grid(row=i,column=2)
+root=tk.Tk()
 
-def myfunction(event):
-    canvas.configure(scrollregion=canvas.bbox("all"),width=200,height=200)
+vscrollbar = tk.Scrollbar(root)
 
-root=Tk()
-sizex = 800
-sizey = 600
-posx  = 100
-posy  = 100
-root.wm_geometry("%dx%d+%d+%d" % (sizex, sizey, posx, posy))
+c= tk.Canvas(root,background = "#D2D2D2",yscrollcommand=vscrollbar.set)
 
-myframe=Frame(root,relief=GROOVE,width=50,height=100,bd=1)
-myframe.place(x=10,y=10)
+vscrollbar.config(command=c.yview)
+vscrollbar.pack(side=tk.LEFT, fill=tk.Y)
 
-canvas=Canvas(myframe)
-frame=Frame(canvas)
-myscrollbar=Scrollbar(myframe,orient="vertical",command=canvas.yview)
-canvas.configure(yscrollcommand=myscrollbar.set)
+f=tk.Frame(c) #Create the frame which will hold the widgets
 
-myscrollbar.pack(side="right",fill="y")
-canvas.pack(side="left")
-canvas.create_window((0,0),window=frame,anchor='nw')
-frame.bind("<Configure>",myfunction)
-data()
+c.pack(side="left", fill="both", expand=True)
+
+#Updated the window creation
+c.create_window(0,0,window=f, anchor='nw')
+
+#Added more content here to activate the scroll
+for i in range(100):
+    tk.Label(f,wraplength=350 ,text="Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s with the release of Letraset sheets containing Lorem Ipsum passages, and more recently with desktop publishing software like Aldus PageMaker including versions of Lorem Ipsum.").pack()
+    tk.Button(f,text="anytext").pack()
+
+#Removed the frame packing
+#f.pack()
+
+#Updated the screen before calculating the scrollregion
+root.update()
+c.config(scrollregion=c.bbox("all"))
+
 root.mainloop()

@@ -32,6 +32,7 @@ class Login:
 
     def loginToSearch(self):
         self.newWindow = tk.Toplevel(self.master)
+        # frame.raise()
         self.app = Home(self.newWindow)
 
     def close_windows(self):
@@ -77,40 +78,40 @@ class Home:
 
 class SearchResults:
 
-    # def on_configure(canvas):
-    #     canvas.configure(scrollregion=canvas.bbox('all'))
-
     def __init__(self, master, result):
-        # canvas = tk.Canvas(self)
-        # canvas.pack(side=tkc.LEFT)
-        # bar = tk.Scrollbar(self.frame, command=canvas.yview)
-        # bar.pack(side=tkc.RIGHT, fill=tkc.Y)
-        # canvas.configure(yscrollcommand=bar.set)
-        # canvas.bind('<Configure>', self.on_configure)
-        # frame = tk.Frame(canvas)
-        # canvas.create_window((0, 0), window=frame, anchor='nw')
+
         self.master = master
         self.frame = tk.Frame(self.master)
-        self.title = tk.Label(self.frame, text="Property Results", width=50)
-        self.title.pack()
-
+        self.title = tk.Label(self.frame, text="Property Search Results")
+        self.title.grid(row=0)
+        count = 1
         for set1 in result["response"]["listings"]:
             #print(set1["title"])
             #Image
-            url = set1["img_url"]
-            fileurl = cStringIO.StringIO(urllib.urlopen(url).read())
-            image = Image.open(fileurl)
-            photo1 = ImageTk.PhotoImage(image)
-            imgLabel = tk.Label(self.frame, image=photo1)
-            imgLabel.img = photo1
-            imgLabel.pack()
-            self.listingTitle = tk.Label(self.frame, text=set1["title"], width=50)
-            self.listingTitle.pack()
-            self.keywords = tk.Label(self.frame, text=set1["keywords"], width=50)
-            self.keywords.pack()
-            self.price = tk.Label(self.frame, text=set1["price_formatted"], width=50)
-            self.price.pack()
-        self.frame.pack()
+            if count < 4:
+                descrip = ""
+                url = set1["img_url"]
+                fileurl = cStringIO.StringIO(urllib.urlopen(url).read())
+                image = Image.open(fileurl)
+                resized = image.resize((200, 200), Image.ANTIALIAS)
+                photo1 = ImageTk.PhotoImage(resized)
+                imgLabel = tk.Label(self.frame, image=photo1)
+                imgLabel.img = photo1
+                imgLabel.grid(row=count,column=0, padx=20, pady=5)
+                descrip = descrip + "Listing Title: " + set1["title"] + "\n\n" + "Key Features: " + set1["keywords"] + \
+                          "\n\n" + "Price: " + set1["price_formatted"]
+                # self.listingTitle = tk.Label(self.frame, text=set1["title"])
+                # self.listingTitle.grid(row=count,column=1, padx=5, pady=3)
+                # print "Key Features:"
+                # self.keywords = tk.Label(self.frame, text=set1["keywords"])
+                # self.keywords.grid(row=count,column=1, padx=5, pady=3)
+                # print "Key Features:"
+                # self.price = tk.Label(self.frame, text=set1["price_formatted"])
+                # self.price.grid(row=count,column=1, padx=5, pady=3)
+                self.description = tk.Label(self.frame, text= descrip)
+                self.description.grid(row=count, column=1, padx= 10)
+                count = count+1
+        self.frame.grid()
 
     def close_windows(self):
         self.master.destroy()
