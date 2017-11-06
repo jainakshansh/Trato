@@ -2,10 +2,10 @@ import Tkinter as tk
 import requests
 import json
 import urllib, cStringIO
+from PIL import Image, ImageTk
 
-LARGE_FONT = ("Verdana", 12)
+LARGE_FONT = ("Verdana", 20)
 
-result = '{}'
 
 class TratoApp(tk.Tk):
     def __init__(self, *args, **kwargs):
@@ -79,11 +79,8 @@ class Login(tk.Frame):
             print "Invalid Pass"
 
 
-def storesearch(result1):
-    res = result1
-    return res
-
 class Home(tk.Frame):
+
     def __init__(self, parent, controller):
         tk.Frame.__init__(self, parent)
         button2 = tk.Button(self, text="Log Out",
@@ -123,7 +120,6 @@ class Home(tk.Frame):
         submitButton.pack()
 
     def makeSearchQuery(self, searchquery, value, c1, c2, c3, controller):
-        global result
         print searchquery
         print value
         if value == 1:
@@ -138,33 +134,59 @@ class Home(tk.Frame):
         if c3 == 1:
             bedrooms_max = 5
         else:
-            bedrooms_max = bedrooms
+            if bedrooms:
+                bedrooms_max = bedrooms
+            else:
+                bedrooms_max = 5
+
 
         url = "https://api.nestoria.in/api"
 
         querystring = {"encoding": "json", "pretty": "1", "action": "search_listings", "country": "in",
-                       "listing_type": option, "place_name": searchquery, "bedroom_min": bedrooms, "bedroom_max": bedrooms_max}
-
+                     "listing_type": option, "place_name": searchquery, "bedroom_min": bedrooms, "bedroom_max": bedrooms_max}
         response = requests.request("GET", url, params=querystring)
         # print response.json()
         result = response.json()
-        storesearch(result)
-        # print result["response"]["listings"][0]["title"]
-        controller.show_frame(SearchResults)
+        print result["response"]["listings"][0]["title"]
+        self.newWindow = tk.Toplevel(self.master)
+        self.app = SearchResults(self.newWindow, result)
+        # controller.show_frame(SearchResults)
 
 
 class SearchResults(tk.Frame):
-    def __init__(self, parent, controller):
+    def __init__(self, parent, result):
         tk.Frame.__init__(self, parent)
         print "I reached the next window!"
-        label = tk.Label(self, text="Search Results:", font=LARGE_FONT)
-        label.grid(row=0)
-        res = storesearch(result)
-
-
-
-
-
+        title = tk.Label(self, text="Property Search Results")
+        title.grid(row=0)
+        print result["response"]["listings"][0]["title"]
+        # count = 1
+        # for set1 in result["response"]["listings"]:
+        #     # print(set1["title"])
+        #     # Image
+        #     if count < 8:
+        #         descrip = ""
+        #         url = set1["img_url"]
+        #         fileurl = cStringIO.StringIO(urllib.urlopen(url).read())
+        #         image = Image.open(fileurl)
+        #         resized = image.resize((200, 200), Image.ANTIALIAS)
+        #         photo1 = ImageTk.PhotoImage(resized)
+        #         imgLabel = tk.Label(self, image=photo1)
+        #         imgLabel.img = photo1
+        #         imgLabel.grid(row=count, column=0, padx=20, pady=5)
+        #         descrip = descrip + "Listing Title: " + set1["title"] + "\n\n" + "Key Features: " + set1["keywords"] + \
+        #                   "\n\n" + "Price: " + set1["price_formatted"]
+        #         # self.listingTitle = tk.Label(self.frame, text=set1["title"])
+        #         # self.listingTitle.grid(row=count,column=1, padx=5, pady=3)
+        #         # print "Key Features:"
+        #         # self.keywords = tk.Label(self.frame, text=set1["keywords"])
+        #         # self.keywords.grid(row=count,column=1, padx=5, pady=3)
+        #         # print "Key Features:"
+        #         # self.price = tk.Label(self.frame, text=set1["price_formatted"])
+        #         # self.price.grid(row=count,column=1, padx=5, pady=3)
+        #         description = tk.Label(self, text=descrip)
+        #         description.grid(row=count, column=1, padx=10)
+        #         count = count + 1
 
 
 app = TratoApp()
