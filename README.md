@@ -4,10 +4,10 @@
 With a great focus on User Experience and Design the software will quickly display the available properties in a particular area to the brokers with respect to the requirements of the customers.
 
 ## Unique features of the application:
-•	Cross platform support – offers operating support for most of the known and commercial operating systems.
-•	User account – for real estate agents and provide features with respect to their hierarchy in the firm.
-•	Search – local search engine based on keywords.
-•	FAQ and Help functionality – to help users get on board with the software when using it in the initial stages of their business.
+* Cross platform support – offers operating support for most of the known and commercial operating systems.
+* User account – for real estate agents and provide features with respect to their hierarchy in the firm.
+*	Search – local search engine based on keywords.
+*	FAQ and Help functionality – to help users get on board with the software when using it in the initial stages of their business.
 
 
 ## Working of the application:
