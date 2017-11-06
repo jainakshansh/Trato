@@ -1,9 +1,11 @@
 import Tkinter as tk
 import requests
+import json
 import urllib, cStringIO
 
 LARGE_FONT = ("Verdana", 12)
 
+result = '{}'
 
 class TratoApp(tk.Tk):
     def __init__(self, *args, **kwargs):
@@ -17,7 +19,7 @@ class TratoApp(tk.Tk):
 
         self.frames = {}
 
-        for F in (StartPage, Login, Home):
+        for F in (StartPage, Login, Home, SearchResults):
             frame = F(container, self)
 
             self.frames[F] = frame
@@ -77,6 +79,10 @@ class Login(tk.Frame):
             print "Invalid Pass"
 
 
+def storesearch(result1):
+    res = result1
+    return res
+
 class Home(tk.Frame):
     def __init__(self, parent, controller):
         tk.Frame.__init__(self, parent)
@@ -94,28 +100,70 @@ class Home(tk.Frame):
         r1 = tk.Radiobutton(self, text="Buy", variable=v, value=1).pack()
         r2 = tk.Radiobutton(self, text="Rent", variable=v, value=2).pack()
 
+        checkVar1 = tk.IntVar()
+        checkVar2 = tk.IntVar()
+        checkVar3 = tk.IntVar()
+
+        label = tk.Label(self, text="No. of Bedrooms:", font=LARGE_FONT)
+        label.pack(pady=10, padx=10)
+
+        C1 = tk.Checkbutton(self, text="2", variable=checkVar1, onvalue=1, offvalue=0)
+
+        C2 = tk.Checkbutton(self, text="3", variable=checkVar2, onvalue=1, offvalue=0)
+
+        C3 = tk.Checkbutton(self, text="3+", variable=checkVar3, onvalue=1, offvalue=0)
+
+        C1.pack()
+        C2.pack()
+        C3.pack()
+
         submitButton = tk.Button(self, text="Search for properties",
-                            command=lambda: self.makeSearchQuery(searchQuery.get(), v.get(), controller))
+                            command=lambda: self.makeSearchQuery(searchQuery.get(), v.get(),
+                                            checkVar1.get(), checkVar2.get(), checkVar3.get(), controller))
         submitButton.pack()
 
-    def makeSearchQuery(self, searchQuery, value, controller):
-        print searchQuery
+    def makeSearchQuery(self, searchquery, value, c1, c2, c3, controller):
+        global result
+        print searchquery
         print value
-
         if value == 1:
             option = "buy"
         else:
             option = "rent"
 
+        if c1 == 1:
+            bedrooms = 2
+        if c2 == 1:
+            bedrooms = 3
+        if c3 == 1:
+            bedrooms_max = 5
+        else:
+            bedrooms_max = bedrooms
+
         url = "https://api.nestoria.in/api"
 
         querystring = {"encoding": "json", "pretty": "1", "action": "search_listings", "country": "in",
-                       "listing_type": option, "place_name": searchQuery}
+                       "listing_type": option, "place_name": searchquery, "bedroom_min": bedrooms, "bedroom_max": bedrooms_max}
+
         response = requests.request("GET", url, params=querystring)
         # print response.json()
         result = response.json()
-        print result["response"]["listings"][0]["title"]
-        # controller.show_frame(Home)
+        storesearch(result)
+        # print result["response"]["listings"][0]["title"]
+        controller.show_frame(SearchResults)
+
+
+class SearchResults(tk.Frame):
+    def __init__(self, parent, controller):
+        tk.Frame.__init__(self, parent)
+        print "I reached the next window!"
+        label = tk.Label(self, text="Search Results:", font=LARGE_FONT)
+        label.grid(row=0)
+        res = storesearch(result)
+
+
+
+
 
 
 
