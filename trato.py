@@ -78,18 +78,8 @@ class Home:
 
 class SearchResults:
 
-    # def on_configure(canvas):
-    #     canvas.configure(scrollregion=canvas.bbox('all'))
-
     def __init__(self, master, result):
-        # canvas = tk.Canvas(self)
-        # canvas.pack(side=tkc.LEFT)
-        # bar = tk.Scrollbar(self.frame, command=canvas.yview)
-        # bar.pack(side=tkc.RIGHT, fill=tkc.Y)
-        # canvas.configure(yscrollcommand=bar.set)
-        # canvas.bind('<Configure>', self.on_configure)
-        # frame = tk.Frame(canvas)
-        # canvas.create_window((0, 0), window=frame, anchor='nw')
+
         self.master = master
         self.frame = tk.Frame(self.master)
         self.title = tk.Label(self.frame, text="Property Search Results")
@@ -98,7 +88,7 @@ class SearchResults:
         for set1 in result["response"]["listings"]:
             #print(set1["title"])
             #Image
-            if count < 8:
+            if count < 4:
                 descrip = ""
                 url = set1["img_url"]
                 fileurl = cStringIO.StringIO(urllib.urlopen(url).read())
@@ -131,6 +121,7 @@ def main():
     root = tk.Tk()
     app = Login(root)
     root.mainloop()
+
 
 if __name__ == '__main__':
     main()

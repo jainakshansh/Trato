@@ -1,6 +1,10 @@
 import Tkinter as tk
+import requests
+import json
+import urllib, cStringIO
+from PIL import Image, ImageTk
 
-LARGE_FONT = ("Verdana", 12)
+LARGE_FONT = ("Verdana", 20)
 
 
 class TratoApp(tk.Tk):
@@ -15,7 +19,7 @@ class TratoApp(tk.Tk):
 
         self.frames = {}
 
-        for F in (StartPage, Login, Home):
+        for F in (StartPage, Login, Home, SearchResults):
             frame = F(container, self)
 
             self.frames[F] = frame
@@ -32,9 +36,8 @@ class TratoApp(tk.Tk):
 class StartPage(tk.Frame):
     def __init__(self, parent, controller):
         tk.Frame.__init__(self, parent)
-        label = tk.Label(self, text="Start Page", font=LARGE_FONT)
+        label = tk.Label(self, text="Welcome to Trato", font=LARGE_FONT)
         label.pack(pady=10, padx=10)
-
         button = tk.Button(self, text="Login",
                            command=lambda: controller.show_frame(Login))
         button.pack()
@@ -47,7 +50,11 @@ class StartPage(tk.Frame):
 class Login(tk.Frame):
     def __init__(self, parent, controller):
         tk.Frame.__init__(self, parent)
-        label = tk.Label(self, text="Page One!!!", font=LARGE_FONT)
+        button2 = tk.Button(self, text="Back to Start",
+                            command=lambda: controller.show_frame(StartPage))
+        button2.pack()
+
+        label = tk.Label(self, text="Login", font=LARGE_FONT)
         label.pack(pady=10, padx=10)
 
         label1 = tk.Label(self, text="Username", width=25)
@@ -58,24 +65,128 @@ class Login(tk.Frame):
         label2.pack()
         entry2 = tk.Entry(self, show='*', bd=1)
         entry2.pack()
-        button1 = tk.Button(self, text='Login', width=15, command=lambda: controller.show_frame(Home))
+        button1 = tk.Button(self, text='Login', width=15, command=lambda: self.validation(entry1.get(), entry2.get(),
+                                                                                          controller))
         button1.pack(pady=10)
-        button2 = tk.Button(self, text="Back to Start",
-                            command=lambda: controller.show_frame(StartPage))
-        button2.pack()
+
+    def validation(self, user, password, controller):
+        print user
+        print password
+        if user == "tush" and password == "pass":
+            print "Correct Pass"
+            controller.show_frame(Home)
+        else:
+            print "Invalid Pass"
 
 
 class Home(tk.Frame):
+
     def __init__(self, parent, controller):
         tk.Frame.__init__(self, parent)
-        label = tk.Label(self, text="Search!!!", font=LARGE_FONT)
-        label.pack(pady=10, padx=10)
-        button1 = tk.Button(self, text="Back to Home",
-                            command=lambda: controller.show_frame(StartPage))
-        button1.pack()
-        button2 = tk.Button(self, text="Page One",
+        button2 = tk.Button(self, text="Log Out",
                             command=lambda: controller.show_frame(Login))
         button2.pack()
+
+        label = tk.Label(self, text="Search for property (Enter Area / Locality)", font=LARGE_FONT)
+        label.pack(pady=10, padx=10)
+
+        searchQuery = tk.Entry(self, bd=1)
+        searchQuery.pack()
+
+        v = tk.IntVar()
+        r1 = tk.Radiobutton(self, text="Buy", variable=v, value=1).pack()
+        r2 = tk.Radiobutton(self, text="Rent", variable=v, value=2).pack()
+
+        checkVar1 = tk.IntVar()
+        checkVar2 = tk.IntVar()
+        checkVar3 = tk.IntVar()
+
+        label = tk.Label(self, text="No. of Bedrooms:", font=LARGE_FONT)
+        label.pack(pady=10, padx=10)
+
+        C1 = tk.Checkbutton(self, text="2", variable=checkVar1, onvalue=1, offvalue=0)
+
+        C2 = tk.Checkbutton(self, text="3", variable=checkVar2, onvalue=1, offvalue=0)
+
+        C3 = tk.Checkbutton(self, text="3+", variable=checkVar3, onvalue=1, offvalue=0)
+
+        C1.pack()
+        C2.pack()
+        C3.pack()
+
+        submitButton = tk.Button(self, text="Search for properties",
+                            command=lambda: self.makeSearchQuery(searchQuery.get(), v.get(),
+                                            checkVar1.get(), checkVar2.get(), checkVar3.get(), controller))
+        submitButton.pack()
+
+    def makeSearchQuery(self, searchquery, value, c1, c2, c3, controller):
+        print searchquery
+        print value
+        if value == 1:
+            option = "buy"
+        else:
+            option = "rent"
+
+        if c1 == 1:
+            bedrooms = 2
+        if c2 == 1:
+            bedrooms = 3
+        if c3 == 1:
+            bedrooms_max = 5
+        else:
+            if bedrooms:
+                bedrooms_max = bedrooms
+            else:
+                bedrooms_max = 5
+
+
+        url = "https://api.nestoria.in/api"
+
+        querystring = {"encoding": "json", "pretty": "1", "action": "search_listings", "country": "in",
+                     "listing_type": option, "place_name": searchquery, "bedroom_min": bedrooms, "bedroom_max": bedrooms_max}
+        response = requests.request("GET", url, params=querystring)
+        # print response.json()
+        result = response.json()
+        print result["response"]["listings"][0]["title"]
+        self.newWindow = tk.Toplevel(self.master)
+        self.app = SearchResults(self.newWindow, result)
+        # controller.show_frame(SearchResults)
+
+
+class SearchResults(tk.Frame):
+    def __init__(self, parent, result):
+        tk.Frame.__init__(self, parent)
+        print "I reached the next window!"
+        title = tk.Label(self, text="Property Search Results")
+        title.grid(row=0)
+        print result["response"]["listings"][0]["title"]
+        # count = 1
+        # for set1 in result["response"]["listings"]:
+        #     # print(set1["title"])
+        #     # Image
+        #     if count < 8:
+        #         descrip = ""
+        #         url = set1["img_url"]
+        #         fileurl = cStringIO.StringIO(urllib.urlopen(url).read())
+        #         image = Image.open(fileurl)
+        #         resized = image.resize((200, 200), Image.ANTIALIAS)
+        #         photo1 = ImageTk.PhotoImage(resized)
+        #         imgLabel = tk.Label(self, image=photo1)
+        #         imgLabel.img = photo1
+        #         imgLabel.grid(row=count, column=0, padx=20, pady=5)
+        #         descrip = descrip + "Listing Title: " + set1["title"] + "\n\n" + "Key Features: " + set1["keywords"] + \
+        #                   "\n\n" + "Price: " + set1["price_formatted"]
+        #         # self.listingTitle = tk.Label(self.frame, text=set1["title"])
+        #         # self.listingTitle.grid(row=count,column=1, padx=5, pady=3)
+        #         # print "Key Features:"
+        #         # self.keywords = tk.Label(self.frame, text=set1["keywords"])
+        #         # self.keywords.grid(row=count,column=1, padx=5, pady=3)
+        #         # print "Key Features:"
+        #         # self.price = tk.Label(self.frame, text=set1["price_formatted"])
+        #         # self.price.grid(row=count,column=1, padx=5, pady=3)
+        #         description = tk.Label(self, text=descrip)
+        #         description.grid(row=count, column=1, padx=10)
+        #         count = count + 1
 
 
 app = TratoApp()
