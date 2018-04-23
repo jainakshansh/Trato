@@ -2,6 +2,8 @@ import Tkinter as tk
 import requests
 import urllib, cStringIO
 from PIL import Image, ImageTk
+from passlib.hash import pbkdf2_sha256
+import tkMessageBox
 # from twisted.internet.defer import inlineCallbacks
 # from twisted.internet.task import react
 # from requests_threads import AsyncSession
@@ -30,13 +32,12 @@ class TratoApp(tk.Tk):
             frame.grid(row=0, column=0, sticky="nsew")
 
         # Change back to Start Page when not debugging
-        self.show_frame(Home)
+        self.show_frame(StartPage)
 
     def show_frame(self, cont):
         frame = self.frames[cont]
         frame.tkraise()
         frame.event_generate("<<ShowFrame>>")
-
 
     def get_page(self, page_class):
         return self.frames[page_class]
@@ -83,12 +84,15 @@ class Login(tk.Frame):
     def validation(self, user, password, controller):
         print user
         print password
+        hash1 = pbkdf2_sha256.hash("pass")
+        print hash1
         # file handling, encrypt mdhash
-        if user == "tush" and password == "pass":
+        if user == "tush" and pbkdf2_sha256.verify(password, hash1):
             print "Correct Pass"
             controller.show_frame(Home)
         else:
             print "Invalid Pass"
+            tkMessageBox.showerror("Login Error", "Invalid User/Pass")
 
 
 class Home(tk.Frame):
